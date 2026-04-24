@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from parser import parse_xlsx
 from analyzer import analyze
@@ -99,3 +100,13 @@ async def download_report(report_id: str):
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+# ── Static frontend (production) ────────────────────────────────
+_static = Path(__file__).parent / "static"
+if _static.exists():
+    app.mount("/assets", StaticFiles(directory=str(_static / "assets")), name="assets")
+
+    @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+    async def serve_spa(full_path: str):
+        return FileResponse(str(_static / "index.html"))
