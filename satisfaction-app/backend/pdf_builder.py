@@ -51,10 +51,20 @@ def _get_mpl_font():
     candidates = [
         "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
         "/usr/share/fonts/nanum/NanumGothic.ttf",
+        "/usr/share/fonts/truetype/unfonts-core/UnDotum.ttf",
+        "/usr/share/fonts/truetype/baekmuk/gulim.ttf",
     ]
     for p in candidates:
         if os.path.exists(p):
             return fm.FontProperties(fname=p)
+    # Try to find any CJK/Korean capable font from system
+    for f in fm.findSystemFonts():
+        fname = os.path.basename(f).lower()
+        if any(k in fname for k in ("nanum", "gulim", "dotum", "batang", "malgun", "cjk", "gothic")):
+            try:
+                return fm.FontProperties(fname=f)
+            except Exception:
+                continue
     return fm.FontProperties()
 
 

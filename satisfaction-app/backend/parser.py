@@ -38,10 +38,24 @@ def parse_xlsx(file_bytes: bytes) -> dict:
     import io
     raw = pd.read_excel(io.BytesIO(file_bytes), header=None)
 
-    # Row 0 = header row (column meta names), Row 1 = question text, Row 2+ = data
+    # Detect header format:
+    # - Standard Google Forms: Row 0 = question text, Row 1+ = data
+    # - Custom two-row format: Row 0 = meta names, Row 1 = question text, Row 2+ = data
     header_row = raw.iloc[0].fillna("").astype(str).str.strip()
-    question_row = raw.iloc[1].fillna("").astype(str).str.strip()
-    data = raw.iloc[2:].reset_index(drop=True)
+    if len(raw) > 1:
+        row1 = raw.iloc[1].fillna("").astype(str).str.strip()
+        likert_hits = row1.isin(set(SCORE_MAP.keys())).sum()
+        if likert_hits >= 2:
+            # Standard single-header: row 0 is question text, row 1+ is data
+            question_row = header_row
+            data = raw.iloc[1:].reset_index(drop=True)
+        else:
+            # Two-row header: row 1 is question text, row 2+ is data
+            question_row = row1
+            data = raw.iloc[2:].reset_index(drop=True)
+    else:
+        question_row = header_row
+        data = raw.iloc[1:].reset_index(drop=True)
     data.columns = range(len(data.columns))
 
     likert_cols = []
