@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { API_BASE } from "../api.js";
 
 export default function Step2Upload({ info, onAnalyze, onBack }) {
   const [file, setFile] = useState(null);
@@ -38,7 +39,7 @@ export default function Step2Upload({ info, onAnalyze, onBack }) {
     formData.append("program_goal", info.program_goal);
 
     try {
-      const res = await fetch("/api/analyze", { method: "POST", body: formData });
+      const res = await fetch(`${API_BASE}/api/analyze`, { method: "POST", body: formData });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.detail || "분석 중 오류가 발생했습니다.");

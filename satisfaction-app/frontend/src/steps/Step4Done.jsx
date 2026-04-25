@@ -1,8 +1,9 @@
 import React from "react";
+import { API_BASE } from "../api.js";
 
 export default function Step4Done({ result, programName, onReset }) {
   const handleDownload = () => {
-    window.open(result.pdf_url, "_blank");
+    window.open(`${API_BASE}${result.pdf_url}`, "_blank");
   };
 
   const preview = result.preview_data || {};
